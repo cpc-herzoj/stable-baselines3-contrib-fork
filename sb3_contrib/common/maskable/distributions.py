@@ -63,12 +63,11 @@ class MaskableCategorical(Categorical):
             self.masks = None
             logits = self._original_logits
 
-        # remove cached probs if present
-        if 'probs' in self.__dict__:
-            delattr(self, 'probs')
-        
         # Reinitialize with updated logits
-        super().__init__(logits=logits)
+        super().__init__(logits=logits, validate_args=False)
+
+        # self.probs may already be cached, so we must force an update
+        self.probs = logits_to_probs(self.logits)
 
     def entropy(self) -> th.Tensor:
         if self.masks is None:
